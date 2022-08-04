@@ -21,6 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors(corsOptions));
 
+// for parsing multipart/form-data
+app.use(express.static('public'));
+
 
 app.use("/api/v1", registerRoute, interviewerRoute, candidateRoute);
 

@@ -1,6 +1,19 @@
 const candidateModel = require("../models/candidate");
 const interviewerSlotModel = require("../models/interviewerSlot");
 const interviewModel = require("../models/interview");
+const WebSocket = require("ws");
+const websocketServer = new WebSocket.Server({
+    noServer: true,
+    path: "/websockets",
+});
+
+websocketServer.on('connection', ws => {
+    ws.on('message', message => {
+      console.log(`Received message => ${message}`)
+    })
+    ws.send('Hello! Message From Server!!')
+})
+  
 
 const checkAvailabilitySlotMatch = (candidate, interviewer) => {
     for (let i = 0; i < interviewer.length; i++) {
@@ -10,6 +23,9 @@ const checkAvailabilitySlotMatch = (candidate, interviewer) => {
         if (filteredArray) {
             scheduleInterview(filteredArray[0], candidate, interviewer[i])
             break;
+        } else {
+            //emitting candidate ID 
+            websocketServer.emit("send message to TA team", candidate._id);
         }
     }
 }

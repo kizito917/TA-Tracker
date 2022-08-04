@@ -1,18 +1,34 @@
+var fs = require("fs");
 const candidateModel = require("../models/candidate");
 
 const createCandidate = (req, res) => {
-    const { name, phone, resume_link, availability_slots } = req.body;
-    var payload = {
-        name,
-        phone,
-        resume_link,
-        created_at: Date.now(),
-        updated_at: Date.now(),
-        availability_slots,
+    const { name, phone, availability_slots } = req.body;
+    // console.log(req.body);
+    // console.log(req.file);
+    if (req.file.mimetype != 'application/pdf') {
+        res.status(404).json("File uploaded is not a pdf file")
+    } else {
+        var payload = {
+            name,
+            phone,
+            resume_link: null,
+            created_at: Date.now(),
+            updated_at: Date.now(),
+            availability_slots,
+        }
+        candidateModel.create(payload)
+        .then((result) => {
+            res.status(200).json("Candidate created successfully");
+            var fileName = result._id + '_' + Date.now() + '.pdf';
+            fs.writeFile(`./uploads/${fileName}`, req.file.buffer, (err) => {
+                if (err) throw err;
+                candidateModel.findOneAndUpdate({_id: result._id}, {$set: {resume_link: `./uploads/${fileName}`}})
+                .then(() => console.log("Updated"))
+                .catch((err) => console.log(err))
+            })
+        })
+        .catch((err) => res.status(501).json("Unable to create candidate", err)) 
     }
-    candidateModel.create(payload)
-    .then(() => res.status(200).json("Candidate created successfully"))
-    .catch((err) => res.status(501).json("Unable to create candidate", err))
 }
 
 const addAvailabilitySlot = async (req, res) => {
