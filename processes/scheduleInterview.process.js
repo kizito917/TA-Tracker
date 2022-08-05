@@ -3,7 +3,7 @@ const interviewerSlotModel = require("../models/interviewerSlot");
 const interviewModel = require("../models/interview");
 const WebSocket = require("ws");
 const websocketServer = new WebSocket.Server({
-    noServer: true,
+    port: 8000,
     path: "/websockets",
 });
 
